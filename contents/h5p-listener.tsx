@@ -106,8 +106,8 @@ const h5pListenerToaster = () => {
         'working mothers': ['wage-earning mothers'],
         'workmen': ['workers', 'wage earners'],
       }
-    let genderBias = []
     const [genderWord,setGenderWord] = useState([''])
+    let arrLength = 0
 
     useEffect(() => {
         window.addEventListener('load', (event) => {
@@ -124,22 +124,24 @@ const h5pListenerToaster = () => {
                         inputFields.forEach((inputField) => {
                             inputField.addEventListener('input', (event:any) => {
                                 const target = event.target as HTMLInputElement
+                                let genderBias = []
                                 Object.keys(dictionary1).forEach(word => {
                                     const regex = new RegExp(`\\b${word}\\b`, 'gi')
                                     if(regex.test(target.value) && !genderBias.includes(word)){
                                         genderBias.push(word)
-                                        setGenderWord(genderBias)
-                                        setOp(1)
-                                        setTimeout(() => {
-                                            setOp(0)
-                                        }, 2000)
+                                       
                                     }
                                 })
-                                console.log(genderBias)
 
-                                if(target.value === ''){
-                                    genderBias = []
+                                if(arrLength !== genderBias.length){
+                                    setGenderWord(genderBias)
+                                    setOp(1)
+                                    setTimeout(() => {
+                                        setOp(0)
+                                    }, 3000)
                                 }
+
+                                arrLength = genderBias.length
                                 console.log(event.target.value)
                             })
                         })
@@ -166,7 +168,7 @@ const h5pListenerToaster = () => {
             right: '20px',
             bottom: '20px',
           }} id="toastMessage">
-            Gender-bias: {genderWord}
+            Gender-bias: {genderWord.join(', ')}    
           </div>
     )
 }

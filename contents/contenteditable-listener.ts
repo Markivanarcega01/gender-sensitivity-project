@@ -16,13 +16,13 @@ document.addEventListener("input", (event) => {
     resetContent(target)
     checkGenderAndHighlight(target)
     highlightedWordListener(target)
-    restoreCursorPosition(target, cursorPosition)
-    target.addEventListener("keyup", (event) => {
-      if (event.key === "Enter") {
-        setCaretAfterNewline(target, cursorPosition)
-      }
-    })
-    //setCaretAfterNewline(target, cursorPosition)
+    //restoreCursorPosition(target, cursorPosition)
+    // target.addEventListener("keyup", (event) => {
+    //   if (event.key === "Enter") {
+    //     setCaretAfterNewline(target, cursorPosition)
+    //   }
+    // })
+    setCaretAfterNewline(target, cursorPosition)
   }
 })
 
@@ -266,7 +266,7 @@ function traverseAndSetCursorToEnd(contentEditableDiv) {
 
 function resetContent(text){
   const regex = new RegExp('<span class="highlight-word">|<\/span>', 'g');
-  const regex2 = new RegExp('<div dir="ltr">|<\/div>', 'g');
+  const regex2 = new RegExp('<div dir="ltr">', 'g');
   if(regex2.test(text.innerHTML)){
     text.innerHTML = text.innerHTML.replace(regex2, '')
     console.log('div ltr exist')

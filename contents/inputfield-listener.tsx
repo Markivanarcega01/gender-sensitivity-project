@@ -22,7 +22,6 @@ export const config: PlasmoCSConfig = {
 
 const toastMessageForGenderBias = () => {
   const [op,setOp] = useState(0)
-  let genderBias = {}
   const [genderWord,setGenderWord] = useState([''])
   const dummyData = ['man', 'woman', 'other', 'unknown']
   const dictionary1 = {
@@ -113,33 +112,33 @@ const toastMessageForGenderBias = () => {
     'working mothers': ['wage-earning mothers'],
     'workmen': ['workers', 'wage earners'],
   }
+  let arrLength = 0
 
   useEffect(()=>{
     window.addEventListener("input", (event:InputEvent) => {
       const target = event.target as HTMLInputElement
+      let genderBias = []
       console.log(target)
       if(target.nodeName === 'INPUT' || target.nodeName === 'TEXTAREA'){
         console.log(target.value)
         Object.keys(dictionary1).forEach(word =>{
           const regex = new RegExp(`\\b${word}\\b`, 'gi')
-          const regex2 = new RegExp(word, 'gi')
-
-          if(regex.test(target.value) && !Object.keys(genderBias).includes(word)){
-            genderBias[word] = true
-            setGenderWord(Object.keys(genderBias))
-            //Show the toast
-            setOp(1)
-            setTimeout(()=>{
-              setOp(0)
-            },2000)
-            //Close the toast
-          }
-          if(!regex2.test(target.value) && Object.keys(genderBias).includes(word)){
-            console.log('delete')
-            delete genderBias[word]
+          //const regex2 = new RegExp(word, 'gi')
+          if(regex.test(target.value) && !genderBias.includes(word)){ //If word in INPUT && If word not in genderBias
+            genderBias.push(word)
           }
         })
-        console.log(Object.keys(genderBias))
+        
+        if(arrLength !== genderBias.length){
+          setGenderWord(genderBias)
+          setOp(1)
+          setTimeout(()=>{
+            setOp(0)
+          },2000)
+        }
+  
+        arrLength = genderBias.length
+        console.log(genderBias)
       }
     })
   },[])
