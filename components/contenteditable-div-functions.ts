@@ -1,29 +1,8 @@
-import type { PlasmoCSConfig } from "plasmo"
-import {dictionary} from "../components/dictionary"
-
-export const config: PlasmoCSConfig = {
-  //matches: ["<all_urls>"],
-  matches: ["https://mail.google.com/mail/*","https://workspace.upou.edu.ph/*"],
-  run_at: "document_end",
-  //css: ["font.css"]
-}
-
-document.addEventListener("input", (event) => { // there is a bug wherein the suggested words are messing up the contenteditable
-  if(event.target instanceof HTMLElement && event.target.contentEditable === "true"){
-    const target = event.target as HTMLElement
-    let cursorPosition = saveCursorPosition(target)
-    resetContent(target)
-    checkGenderAndHighlight(target)
-    highlightedWordListener(target)
-    setCaretAfterNewline(target, cursorPosition)
-  }
-})
-
-
-function createModal(suggestedWords, wordElement) {
+import { dictionary } from "./dictionary";
+export function createModal(suggestedWords, wordElement, iframe2Doc) {
   // Create modal container
   const rect = wordElement.getBoundingClientRect();
-  const modal = document.createElement('div');
+  const modal = iframe2Doc.createElement('div');
   modal.style.cssText = `
       position: fixed;
       top: 0;
@@ -37,45 +16,46 @@ function createModal(suggestedWords, wordElement) {
   `;
 
   // Create modal content
-  const modalContent = document.createElement('div');
+  const modalContent = iframe2Doc.createElement('div');
   modalContent.style.cssText = `
       background-color: #f5f6f7;
       padding: 10px;
       border-radius: 5px;
       width: auto;
       position: absolute;
-      top:${rect.top + window.scrollY + 30}px;
+      top:${rect.top + window.scrollY + 20}px;
       left:${rect.left + window.scrollX}px;
   `;
 
   // Add suggested words list
-  const wordList = document.createElement('ul');
+  const wordList = iframe2Doc.createElement('ul');
   wordList.style.cssText=`
       list-style-type : none;
       margin: 0;
       padding: 0;
   `
   suggestedWords.forEach(word => {
-      const listItem = document.createElement('li');
+      const listItem = iframe2Doc.createElement('li');
       listItem.style.cssText=`
           margin-right: 20px;
           width: auto;
-          display: table;
+          display: inline;
           padding : 2px;
+          float:left;
       `
       listItem.textContent = word;
       listItem.style.cursor = 'pointer';
       listItem.addEventListener('click', (event) => {
           // Return the selected word and close the modal
           modal.dataset.selectedWord = word;
-          document.body.removeChild(modal);
+          iframe2Doc.body.removeChild(modal);
       });
       wordList.appendChild(listItem);
   });
   modalContent.appendChild(wordList);
 
   // Add close button
-  const closeButton = document.createElement('button');
+  const closeButton = iframe2Doc.createElement('button');
   closeButton.style.cssText=`
        border-radius: 50%;
        position: absolute;
@@ -84,7 +64,7 @@ function createModal(suggestedWords, wordElement) {
   `
   closeButton.textContent = 'X';
   closeButton.addEventListener('click', () => {
-      document.body.removeChild(modal);
+      iframe2Doc.body.removeChild(modal);
   });
   modalContent.appendChild(closeButton);
 
@@ -92,9 +72,9 @@ function createModal(suggestedWords, wordElement) {
   return modal;
 }
 
-function modal(suggestedWords, wordElement) {  
-  const modalElement = createModal(suggestedWords,wordElement);
-  document.body.appendChild(modalElement);
+export function modal(suggestedWords, wordElement, iframe2Doc) {  
+  const modalElement = createModal(suggestedWords,wordElement, iframe2Doc);
+  iframe2Doc.body.appendChild(modalElement);
 
   return new Promise((resolve) => {
       //Setup an interval to check if a word has been selected
@@ -108,7 +88,7 @@ function modal(suggestedWords, wordElement) {
 
       modalElement.addEventListener('click', (event) => {
           if (event.target === modalElement) {
-              document.body.removeChild(modalElement);
+              iframe2Doc.body.removeChild(modalElement);
               clearInterval(checkForSelection);
               resolve(null);
           }
@@ -116,11 +96,11 @@ function modal(suggestedWords, wordElement) {
   });
 }
 
-function highlightedWordListener(text) {
-  let words = document.getElementsByClassName("highlight-word");
+export function highlightedWordListener(text,words, iframe2Doc) {
+  //let words = document.getElementsByClassName("highlight-word");
 
   let suggestedWords = ['Word1', 'Word2', 'Word3', 'Word4'];
-  //console.log(words)
+  console.log(words)
   if (words.length > 0) {
       for (let i = 0; i < words.length; i++) {
           /**
@@ -135,7 +115,7 @@ function highlightedWordListener(text) {
               let suggestedWordsForWord = dictionary[wordElement.innerText];
               
               wordElement.addEventListener('click', async function modalPopUp(event) {
-                  const selectedWord = await modal(suggestedWordsForWord ? suggestedWordsForWord : suggestedWords, wordElement);
+                  const selectedWord = await modal(suggestedWordsForWord ? suggestedWordsForWord : suggestedWords, wordElement,iframe2Doc);
                   if (selectedWord && typeof wordElement.innerText !== 'undefined') {
                       wordElement.outerHTML = selectedWord;
                       traverseAndSetCursorToEnd(text); // Traverse and set cursor to the end
@@ -152,7 +132,7 @@ function highlightedWordListener(text) {
   }
 }
 
-function traverseAndSetCursorToEnd(contentEditableDiv) {
+export function traverseAndSetCursorToEnd(contentEditableDiv) {
   // Focus on the contenteditable div
   contentEditableDiv.focus();
 
@@ -169,23 +149,17 @@ function traverseAndSetCursorToEnd(contentEditableDiv) {
   selection.addRange(range);
 }
 
-function resetContent(text){
+export function resetContent(text){
   const regex = new RegExp('<span class="highlight-word">|<\/span>', 'g');
   const regex2 = new RegExp('<div dir="ltr">', 'g');
-  const regex3 = document.querySelector('.XjviVd.yq')
-  if(regex3){
-    text.innerHTML = text.innerHTML.replace(regex3, '')
-  }
   if(regex2.test(text.innerHTML)){
     text.innerHTML = text.innerHTML.replace(regex2, '')
     console.log('div ltr exist')
   }
-  text.innerHTML = text.innerHTML.replace(regex, '')
-
-  return text.innerHTML
+  return text.innerHTML = text.innerHTML.replace(regex, '')
 }
 
-function checkGenderAndHighlight(text) {
+export function checkGenderAndHighlight(text) {
   let textWithHTML = text.innerHTML
 
   // Bawal ang 2 or more words as dictionary keys ex: man (and) one man show
@@ -197,12 +171,12 @@ function checkGenderAndHighlight(text) {
   })
 
   text.innerHTML = textWithHTML
-  //console.log({asd:textWithHTML})
+  console.log({asd:textWithHTML})
   return text;
 }
 
 
-function saveCursorPosition(element) {
+export function saveCursorPosition(element) {
   let selection = window.getSelection();
   let range = selection.getRangeAt(0);
   let preCaretRange = range.cloneRange();
@@ -212,8 +186,8 @@ function saveCursorPosition(element) {
   return cursorPosition;
 }
 
-// // Function to restore the cursor position after modifying content
-function restoreCursorPosition(element, cursorPosition) {
+
+export function restoreCursorPosition(element, cursorPosition) {
   let selection = window.getSelection();
   let range = document.createRange();
 
@@ -245,7 +219,7 @@ function restoreCursorPosition(element, cursorPosition) {
   selection.addRange(range);
 }
 
-function setCaretAfterNewline(element, cursorPosition) {
+export function setCaretAfterNewline(element, cursorPosition) {
   //let cursorPosition = saveCursorPosition(element);
   let selection = window.getSelection();
   let range = document.createRange();
@@ -253,12 +227,12 @@ function setCaretAfterNewline(element, cursorPosition) {
   // Find the last div in the element
   let lastDiv = null;
   for (let i = element.childNodes.length - 1; i >= 0; i--) {
-      if (element.childNodes[i].nodeName === 'DIV') {
+      if (element.childNodes[i].nodeName === 'P') {
+          //console.log(element.childNodes[i])
           lastDiv = element.childNodes[i];
           break;
       }
   }
-  const skip = element.querySelector('.XjviVd.yq')
   if (lastDiv) {
       // If the last div is empty or contains only a <br>, set caret inside it
       if (lastDiv.childNodes.length === 0 || (lastDiv.childNodes.length === 1 && lastDiv.firstChild.nodeName === 'BR')) {
@@ -267,31 +241,17 @@ function setCaretAfterNewline(element, cursorPosition) {
           //console.log('div with br')
       } else{
           // If the last div has content, set caret after it
-        if(skip){
-            element.removeChild(skip)
-        }
-        restoreCursorPosition(element, cursorPosition)
-        return
+          restoreCursorPosition(element, cursorPosition)
+
+          return
       }
   } else {
       // If no div found, set caret at the end of the element
-    console.log('no div found')
-    if(skip){
-        element.removeChild(skip)
-    }
-    restoreCursorPosition(element, cursorPosition)
-    return
+      restoreCursorPosition(element, cursorPosition)
+
+      return
   }
   selection.removeAllRanges();
   selection.addRange(range);
 }
 
-let style = document.createElement('style');
-style.innerHTML = `
-    .highlight-word {
-        text-decoration: underline;
-        text-decoration-color: blue;
-        cursor: text;
-    }
-`;
-document.head.appendChild(style);

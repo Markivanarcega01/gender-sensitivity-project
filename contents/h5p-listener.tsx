@@ -1,11 +1,9 @@
 import type { PlasmoCSConfig } from "plasmo"
-import delegate from "delegate-it"
 import { useEffect, useState, type HtmlHTMLAttributes } from "react"
-
+import { dictionary } from "~components/dictionary"
 export const config: PlasmoCSConfig = {
-  //matches: ["<all_urls>"],
-  matches: ["https://workspace.upou.edu.ph/*"],
-  //css: ["font.css"]
+  matches: ["https://workspace.upou.edu.ph/contentbank/view.php*"],
+  run_at: "document_start",
 }
 /**
  * window.load to find the h5p main wrap
@@ -15,117 +13,34 @@ export const config: PlasmoCSConfig = {
  */
 
 
-
+//For student side
 const h5pListenerToaster = () => {
     const [op,setOp] = useState(0)
-    const dictionary1 = {
-        'anchorman': ['anchor', 'anchorperson'],
-        'actress': ['actor'],
-        'authoress': ['author'],
-        'aviatrix': ['aviator'],
-        'bellboy': ['bellhop'],
-        'bellman': ['bellhop'],
-        'busboys': ['waiters assistants'],
-        'cameraman': ['camera operators', 'cinematographers', 'photographers'],
-        'career girls': ['career women'],
-        'chairman': ['chairperson'],
-        'chambermaids': ['hotel workers'],
-        'chick': ['woman'],
-        'chorus girls': ['chorus dancers'],
-        'clergyman': ['minister', 'rabbi', 'priest', 'pastor'],
-        'comedienne': ['comedian'],
-        'congressman': ['representative', 'member of congress', 'congress member', 'legislator'],
-        'cowboys': ['ranch hands'],
-        'cowgirls': ['ranch hands'],
-        'craftsmen': ['artisans', 'craft artists', 'craftspersons'],
-        'delivery boys': ['deliverers'],
-        'draftsmen': ['drafters'],
-        'dykes': ['lesbians'],
-        'executrixes': ['executors'],
-        'fathers': ['priests'],
-        'female lawyer': ['lawyer'],
-        'firemen': ['fire fighters'],
-        'fishermen': ['fishers', 'fisherfolk'],
-        'foremen': ['supervisors'],
-        'forefather': ['ancestor'],
-        'founding fathers': ['founders'],
-        'girl': ['adult female'],
-        'girl athlete': ['athlete'],
-        'heroic women': ['heroes'],
-        'heroines': ['heroes'],
-        'hookers': ['prostitutes'],
-        'hostesses': ['hosts'],
-        'headmasters': ['principals'],
-        'headmistresses': ['principals'],
-        'ladies': ['women'],
-        'lady doctor': ['doctor'],
-        'laundrywomen': ['launderers'],
-        'layman': ['layperson', 'nonspecialist', 'non-professional'],
-        'lineman': ['line installer', 'line repairer'],
-        'longshoremen': ['stevedores'],
-        'lumbermen': ['lumbercutters'],
-        'maids': ['domestic helpers', 'household workers'],
-        'mailman': ['mail carrier'],
-        'male nurse': ['nurse'],
-        'male secretary': ['secretary'],
-        'man': ['human being', 'human', 'person', 'individual'],
-        //'man on the street': ['average person', 'ordinary person'],
-        'man-made': ['manufactured', 'synthetic', 'artificial'],
-        'mankind': ['human beings', 'humans', 'humankind', 'humanity'],
-        'manning': ['staffing', 'working', 'running'],
-        'manhood': ['adulthood', 'maturity'],
-        'manpower': ['human resources', 'staff', 'personel', 'labor force'],
-        'masterful': ['domineering', 'very skillful'],
-        'motherhood': ['parenthood'],
-        'fatherhood': ['parenthood'],
-        'old masters': ['classic artists'],
-        //'one man show': ['one person show', 'solo exhibition'],
-        'policeman': ['police officer', 'law enforcement officer'],
-        'poetess': ['poet'],
-        'postman': ['letter carrier'],
-        'pressmen': ['press operators'],
-        'proprietress': ['proprietor'],
-        'repairmen': ['repairers'],
-        'salesman': ['salesperson', 'sales representative', 'sales agent'],
-        'salesgirls': ['saleswomen'],
-        'servants': ['household help'],
-        'spokesman': ['spokesperson', 'representative'],
-        'sportsmen': ['sports enthusiasts'],
-        'starlets': ['aspiring actors'],
-        'statesmen': ['diplomats', 'political leaders'],
-        'statemanship': ['diplomacy'],
-        'stewardess': ['flight attendant'],
-        'suffragette': ['suffragist'],
-        //'to a man': ['everyone', 'unanimously', 'without exception'],
-        'usherette': ['usher'],
-        'washerwomen': ['launderers'],
-        'watchmen': ['guards'],
-        'weatherman': ['weather reporter', 'weathercaster', 'meteorologist'],
-        'whores': ['prostitutes'],
-        'woman writer': ['writer'],
-        'working mothers': ['wage-earning mothers'],
-        'workmen': ['workers', 'wage earners'],
-      }
+    const [display, setDisplay] = useState('')
+    
     const [genderWord,setGenderWord] = useState([''])
     let arrLength = 0
 
     useEffect(() => {
         window.addEventListener('load', (event) => {
             try {
+                //throw new Error('asd')
                 const iframe = document.getElementsByClassName('h5p-player w-100 border-0')[0] as HTMLIFrameElement
                 const iframeDoc =  iframe.contentDocument
                 const iframe2 = iframeDoc.getElementsByClassName('h5p-iframe h5p-initialized')[0] as HTMLIFrameElement
                 const iframe2Doc = iframe2.contentDocument
                 if(iframe2Doc){
                     iframe2Doc.addEventListener('click', (event:any) => {
-                        console.log('clicked')
+                        //console.log('clicked')
                         const inputFields = iframe2Doc.querySelectorAll('input,textarea')
-                        console.log(inputFields)
+                        //console.log(inputFields)
                         inputFields.forEach((inputField) => {
-                            inputField.addEventListener('input', (event:any) => {
+                            if(inputField.hasAttribute('listener')) return //fixed
+                            inputField.setAttribute('listener','true')
+                            inputField.addEventListener('input', (event:any) => { // may memory problem dito nag stack yung event listener
                                 const target = event.target as HTMLInputElement
                                 let genderBias = []
-                                Object.keys(dictionary1).forEach(word => {
+                                Object.keys(dictionary).forEach(word => {
                                     const regex = new RegExp(`\\b${word}\\b`, 'gi')
                                     if(regex.test(target.value) && !genderBias.includes(word)){
                                         genderBias.push(word)
@@ -135,10 +50,11 @@ const h5pListenerToaster = () => {
 
                                 if(arrLength !== genderBias.length){
                                     setGenderWord(genderBias)
+                                    setDisplay(`Gender bias: ${genderBias.join(', ')}`)
                                     setOp(1)
-                                    setTimeout(() => {
-                                        setOp(0)
-                                    }, 3000)
+                                }
+                                if(genderBias.length === 0){
+                                    setOp(0)
                                 }
 
                                 arrLength = genderBias.length
@@ -148,9 +64,12 @@ const h5pListenerToaster = () => {
                     })
                 }
             } catch (error) {
-                console.log(error)
-                setInterval(function() {
-                    location.reload()
+                console.log('ey')
+                setDisplay('Document not found: Reloading in 5 secs')
+                setOp(1)
+                setTimeout(() => {
+                    setOp(0)
+                    window.location.reload()
                 },5000)
             }    
         })
@@ -168,38 +87,10 @@ const h5pListenerToaster = () => {
             right: '20px',
             bottom: '20px',
           }} id="toastMessage">
-            Gender-bias: {genderWord.join(', ')}    
+            {display}
+             {/*isDocumentLoaded ? `Gender-bias: ${genderWord.join(', ')}` : 'Document not found: Reloading in 5 secs'*/}    
           </div>
     )
 }
 
 export default h5pListenerToaster
-// try comment
-
-//console.log(dom)
-// console.log(document)
-//         const iframe = document.getElementsByClassName('h5p-player w-100 border-0')[0] as HTMLIFrameElement
-//         console.log(iframe) //This returns the iframe tag
-//         const iframeDoc =  iframe.contentDocument
-//         console.log(iframeDoc) // This returns the child document
-//         if (iframeDoc) {
-//             const iframe2 = iframeDoc.getElementsByClassName('h5p-iframe h5p-initialized')[0] as HTMLIFrameElement
-//             console.log(iframe2)
-//             const iframe2Doc = iframe2.contentDocument
-//             console.log(iframe2Doc) //This return the child document of iframe2
-//             if (iframe2Doc) {
-//                 //const container = iframe2Doc.getElementsByClassName('h5p-essay-input-field-textfield')[0]
-//                 const inputFields = iframe2Doc.querySelectorAll('input,textarea')
-//                 console.log(inputFields) //This return nulls
-//                 inputFields.forEach((inputField) => {
-//                     inputField.addEventListener('input', (event:any) => {
-//                         console.log(event.target.value)
-//                     })
-//                 })
-//                     // if(container){
-//                     //     container.addEventListener('input', (event:any) => { //Then I added an event listener in the container of the input/textarea field and use delegation
-//                     //         console.log(event.target.value)
-//                     //     })
-//                     // }
-//             }
-//         }
