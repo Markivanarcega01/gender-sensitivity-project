@@ -1,4 +1,4 @@
-import { dictionary } from "./dictionary";
+import { dictionary, ignoredWords } from "./dictionary";
 export function createModal(suggestedWords, wordElement, iframe2Doc) {
   // Create modal container
   const rect = wordElement.getBoundingClientRect();
@@ -116,7 +116,15 @@ export function highlightedWordListener(text,words, iframe2Doc) {
               
               wordElement.addEventListener('click', async function modalPopUp(event) {
                   const selectedWord = await modal(suggestedWordsForWord ? suggestedWordsForWord : suggestedWords, wordElement,iframe2Doc);
-                  if (selectedWord && typeof wordElement.innerText !== 'undefined') {
+                if(selectedWord == 'IGNORE'){
+                      console.log('ignore')
+                      //wordElement.outerHTML = wordElement.innerText
+                      ignoredWords.push(wordElement.innerText)
+                      wordElement.classList.remove('highlight-word')
+                      wordElement.classList.add('ignore-word')
+                      traverseAndSetCursorToEnd(text);
+                  }
+                  else if(selectedWord && typeof wordElement.innerText !== 'undefined') {
                       wordElement.outerHTML = selectedWord;
                       traverseAndSetCursorToEnd(text); // Traverse and set cursor to the end
                   } else {
@@ -152,6 +160,9 @@ export function traverseAndSetCursorToEnd(contentEditableDiv) {
 export function resetContent(text){
   const regex = new RegExp('<span class="highlight-word">|<\/span>', 'g');
   const regex2 = new RegExp('<div dir="ltr">', 'g');
+  if(text.innerText == ''){
+    ignoredWords.length = 0
+  }
   if(regex2.test(text.innerHTML)){
     text.innerHTML = text.innerHTML.replace(regex2, '')
     console.log('div ltr exist')
@@ -164,9 +175,11 @@ export function checkGenderAndHighlight(text) {
 
   // Bawal ang 2 or more words as dictionary keys ex: man (and) one man show
   Object.keys(dictionary).forEach(word =>{
-
-      const regex = new RegExp(`\\b${word}\\b`,'gi')    
-      textWithHTML = textWithHTML.replace(regex, `<span class='highlight-word'>${word}<\/span>`)
+    if(ignoredWords.includes(word)){
+      return
+    }
+    const regex = new RegExp(`\\b${word}\\b`,'gi')    
+    textWithHTML = textWithHTML.replace(regex, `<span class='highlight-word'>${word}<\/span>`)
       
   })
 

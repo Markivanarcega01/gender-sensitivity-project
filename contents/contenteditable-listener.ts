@@ -1,22 +1,56 @@
 import type { PlasmoCSConfig } from "plasmo"
-import {dictionary} from "../components/dictionary"
+import {dictionary, ignoredWords} from "../components/dictionary"
 
 export const config: PlasmoCSConfig = {
   //matches: ["<all_urls>"],
-  matches: ["https://mail.google.com/mail/*","https://workspace.upou.edu.ph/*"],
+  matches: ["https://mail.google.com/mail/*", "http://127.0.0.1:8000/bias_checker/"],
   run_at: "document_end",
   //css: ["font.css"]
 }
+
+let div = document.createElement('div')
+let btn = document.createElement('button')
+let timeout = null
 
 document.addEventListener("input", (event) => { // there is a bug wherein the suggested words are messing up the contenteditable
   if(event.target instanceof HTMLElement && event.target.contentEditable === "true"){
     const target = event.target as HTMLElement
     let cursorPosition = saveCursorPosition(target)
-    resetContent(target)
-    checkGenderAndHighlight(target)
-    highlightedWordListener(target)
-    setCaretAfterNewline(target, cursorPosition)
+    let words = document.getElementsByClassName("highlight-word")
+    //setCaretAfterNewline(target, cursorPosition)
+    if(timeout){
+      btn.style.display = "block"
+      //btn.style.opacity= '1'
+      clearTimeout(timeout)
+    }
+    timeout = setTimeout(()=>{
+      //btn.style.opacity= '0'
+      btn.style.display = "none"
+      resetContent(target)
+      checkGenderAndHighlight(target)
+      highlightedWordListener(target,words, cursorPosition)
+      //restoreCursorPosition(target, cursorPosition)
+      setCaretAfterNewline(target, cursorPosition)
+    },3000)
+
+    // if(target.innerText != ''){
+    //   btn.style.opacity= '1'
+    // }else{
+    //   btn.style.opacity = '0'
+    // }
+    // if(btn.hasAttribute('listener')){
+    //   btn.addEventListener('click',(event)=>{
+    //     resetContent(target)
+    //     checkGenderAndHighlight(target)
+    //     highlightedWordListener(target,words, cursorPosition)
+    //   })
+    // }else{
+    //   console.log('attribute is set')
+    //   btn.setAttribute('listener', 'true')
+    // }
+
   }
+  
 })
 
 
@@ -116,8 +150,7 @@ function modal(suggestedWords, wordElement) {
   });
 }
 
-function highlightedWordListener(text) {
-  let words = document.getElementsByClassName("highlight-word");
+function highlightedWordListener(text, words, cursorPosition) {
 
   let suggestedWords = ['Word1', 'Word2', 'Word3', 'Word4'];
   //console.log(words)
@@ -136,7 +169,14 @@ function highlightedWordListener(text) {
               
               wordElement.addEventListener('click', async function modalPopUp(event) {
                   const selectedWord = await modal(suggestedWordsForWord ? suggestedWordsForWord : suggestedWords, wordElement);
-                  if (selectedWord && typeof wordElement.innerText !== 'undefined') {
+                  if(selectedWord == 'IGNORE'){
+                      console.log('ignore')
+                      ignoredWords.push(wordElement.innerText)
+                      wordElement.classList.remove('highlight-word')
+                      wordElement.classList.add('ignore-word')
+                      traverseAndSetCursorToEnd(text);
+                  }
+                  else if(selectedWord && typeof wordElement.innerText !== 'undefined') {
                       wordElement.outerHTML = selectedWord;
                       traverseAndSetCursorToEnd(text); // Traverse and set cursor to the end
                   } else {
@@ -146,7 +186,8 @@ function highlightedWordListener(text) {
               });
           })(words[i]); // Immediately invoke function with the word element
       }
-      
+      let ignoreWords = document.getElementsByClassName("ignore-word");
+      console.log(ignoreWords)
   } else {
       console.log('array is empty');
   }
@@ -172,17 +213,19 @@ function traverseAndSetCursorToEnd(contentEditableDiv) {
 function resetContent(text){
   const regex = new RegExp('<span class="highlight-word">|<\/span>', 'g');
   const regex2 = new RegExp('<div dir="ltr">', 'g');
-  const regex3 = document.querySelector('.XjviVd.yq')
-  if(regex3){
-    text.innerHTML = text.innerHTML.replace(regex3, '')
+  //const regex3 = document.querySelector('.XjviVd.yq')
+  if(text.innerText == ''){
+    ignoredWords.length = 0
   }
+  // if(regex3){
+  //   text.innerHTML = text.innerHTML.replace(regex3, '')
+  // }
   if(regex2.test(text.innerHTML)){
     text.innerHTML = text.innerHTML.replace(regex2, '')
     console.log('div ltr exist')
   }
-  text.innerHTML = text.innerHTML.replace(regex, '')
+  return text.innerHTML = text.innerHTML.replace(regex, '')
 
-  return text.innerHTML
 }
 
 function checkGenderAndHighlight(text) {
@@ -190,14 +233,15 @@ function checkGenderAndHighlight(text) {
 
   // Bawal ang 2 or more words as dictionary keys ex: man (and) one man show
   Object.keys(dictionary).forEach(word =>{
-
-      const regex = new RegExp(`\\b${word}\\b`,'gi')    
-      textWithHTML = textWithHTML.replace(regex, `<span class='highlight-word'>${word}<\/span>`)
-      
+    if(ignoredWords.includes(word)){
+      return
+    }
+    const regex = new RegExp(`\\b${word}\\b`,'gi')    
+    textWithHTML = textWithHTML.replace(regex, `<span class='highlight-word'>${word}<\/span>`)
   })
 
   text.innerHTML = textWithHTML
-  //console.log({asd:textWithHTML})
+  console.log({asd:textWithHTML})
   return text;
 }
 
@@ -238,7 +282,7 @@ function restoreCursorPosition(element, cursorPosition) {
       }
       return false;
   }
-
+  
   traverseNodes(node);
 
   selection.removeAllRanges();
@@ -246,10 +290,9 @@ function restoreCursorPosition(element, cursorPosition) {
 }
 
 function setCaretAfterNewline(element, cursorPosition) {
-  //let cursorPosition = saveCursorPosition(element);
   let selection = window.getSelection();
   let range = document.createRange();
-  
+  console.log({caret:cursorPosition})
   // Find the last div in the element
   let lastDiv = null;
   for (let i = element.childNodes.length - 1; i >= 0; i--) {
@@ -258,27 +301,21 @@ function setCaretAfterNewline(element, cursorPosition) {
           break;
       }
   }
-  const skip = element.querySelector('.XjviVd.yq')
+  //const skip = element.querySelector('.XjviVd.yq')
   if (lastDiv) {
       // If the last div is empty or contains only a <br>, set caret inside it
+      // lastDiv.childNodes.length === 0 || (lastDiv.childNodes.length === 1 && lastDiv.firstChild.nodeName === 'BR')
       if (lastDiv.childNodes.length === 0 || (lastDiv.childNodes.length === 1 && lastDiv.firstChild.nodeName === 'BR')) {
           range.setStart(lastDiv, 0);
           range.setEnd(lastDiv, 0);
           //console.log('div with br')
       } else{
-          // If the last div has content, set caret after it
-        if(skip){
-            element.removeChild(skip)
-        }
         restoreCursorPosition(element, cursorPosition)
         return
       }
   } else {
       // If no div found, set caret at the end of the element
     console.log('no div found')
-    if(skip){
-        element.removeChild(skip)
-    }
     restoreCursorPosition(element, cursorPosition)
     return
   }
@@ -293,5 +330,34 @@ style.innerHTML = `
         text-decoration-color: blue;
         cursor: text;
     }
+    @keyframes rotating {
+      50% {transform: rotate(360deg);}
+    }
 `;
 document.head.appendChild(style);
+
+
+div.style.cssText=`
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 1000;
+`
+btn.style.cssText = `
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background-color: #0160C9;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s;
+  animation: rotating 3s infinite;
+  display: none;
+`;
+btn.textContent = "G"
+div.appendChild(btn)
+
+document.body.appendChild(div)

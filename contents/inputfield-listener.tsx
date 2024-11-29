@@ -21,7 +21,7 @@ const toastMessageForGenderBias = () => {
   let arrLength = 0
 
   useEffect(()=>{
-    window.addEventListener("input", (event:InputEvent) => {
+    document.addEventListener("input", (event:InputEvent) => {
       const target = event.target as HTMLInputElement
       let genderBias = []
       console.log(target)
@@ -34,7 +34,7 @@ const toastMessageForGenderBias = () => {
             genderBias.push(word)
           }
         })
-        
+
         if(arrLength !== genderBias.length){
           setGenderWord(genderBias)
           setDisplay(`Gender-bias: ${genderBias.join(', ')}`)

@@ -1,7 +1,7 @@
 import type { PlasmoCSConfig } from "plasmo"
 import { useEffect, useState } from "react"
 import { checkGenderAndHighlight, highlightedWordListener, resetContent, setCaretAfterNewline } from "~components/contenteditable-div-functions";
-import { dictionary } from "~components/dictionary";
+import { dictionary, ignoredWords } from "~components/dictionary";
 
 export const config: PlasmoCSConfig = {
     matches: ["https://workspace.upou.edu.ph/contentbank/edit.php*"],
@@ -105,6 +105,7 @@ const h5pEditorInputListener = () => {
 
     useEffect(() => {
         window.addEventListener('load', (event) => {
+            //ignoredWords.length = 0
             console.log('loaded')
             try {
                 //const iframe = document.getElementsByClassName('h5p-editor-iframe')[0] as HTMLIFrameElement || null
