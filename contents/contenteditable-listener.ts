@@ -3,7 +3,7 @@ import {dictionary, ignoredWords} from "../components/dictionary"
 
 export const config: PlasmoCSConfig = {
   //matches: ["<all_urls>"],
-  matches: ["https://mail.google.com/mail/*", "http://127.0.0.1:8000/bias_checker/"],
+  matches: ["https://mail.google.com/mail/*", "http://127.0.0.1:8000/bias_checker/", "https://markivan01.pythonanywhere.com/bias_checker/"],
   run_at: "document_end",
   //css: ["font.css"]
 }
