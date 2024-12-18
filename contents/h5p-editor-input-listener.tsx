@@ -195,7 +195,7 @@ const h5pEditorInputListener = () => {
                                         if (savedPosition) {
                                             restoreCursorPosition(iframe2Doc, savedPosition);
                                         }
-                                    },3000)
+                                    },5000)
                                     
                                     
                                     
