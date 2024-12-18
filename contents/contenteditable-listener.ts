@@ -17,7 +17,8 @@ document.addEventListener("input", (event) => { // there is a bug wherein the su
     const target = event.target as HTMLElement
     let cursorPosition = saveCursorPosition(target)
     let words = document.getElementsByClassName("highlight-word")
-    //setCaretAfterNewline(target, cursorPosition)
+
+    disableStyles()
     if(timeout){
       btn.style.display = "block"
       //btn.style.opacity= '1'
@@ -26,10 +27,10 @@ document.addEventListener("input", (event) => { // there is a bug wherein the su
     timeout = setTimeout(()=>{
       //btn.style.opacity= '0'
       btn.style.display = "none"
+      enableStyles()
       resetContent(target)
       checkGenderAndHighlight(target)
       highlightedWordListener(target,words, cursorPosition)
-      //restoreCursorPosition(target, cursorPosition)
       setCaretAfterNewline(target, cursorPosition)
     },3000)
 
@@ -323,6 +324,16 @@ function setCaretAfterNewline(element, cursorPosition) {
   selection.addRange(range);
 }
 
+function disableStyles(){
+  if(style.parentNode){
+    style.parentNode.removeChild(style)
+  }
+}
+
+function enableStyles(){
+  document.head.appendChild(style)
+}
+
 let style = document.createElement('style');
 style.innerHTML = `
     .highlight-word {
@@ -330,11 +341,8 @@ style.innerHTML = `
         text-decoration-color: blue;
         cursor: text;
     }
-    @keyframes rotating {
-      50% {transform: rotate(360deg);}
-    }
 `;
-document.head.appendChild(style);
+//document.head.appendChild(style);
 
 
 div.style.cssText=`
@@ -354,7 +362,6 @@ btn.style.cssText = `
   cursor: pointer;
   font-family: system-ui, -apple-system, sans-serif;
   transition: background-color 0.2s;
-  animation: rotating 3s infinite;
   display: none;
 `;
 btn.textContent = "G"

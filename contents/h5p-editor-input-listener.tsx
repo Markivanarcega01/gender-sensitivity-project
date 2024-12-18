@@ -162,7 +162,16 @@ const h5pEditorInputListener = () => {
                                             cursor: text;
                                         }
                                     `;
-                                iframe2Doc.head.appendChild(style);
+                                function disableStyles(){
+                                    if(style.parentNode){
+                                        style.parentNode.removeChild(style)
+                                    }
+                                }
+                                function enableStyles(){
+                                    iframe2Doc.head.appendChild(style)
+                                }
+                                //iframe2Doc.head.appendChild(style);
+                                let timeout = null
                                 iframe2Doc.addEventListener('input', (event: any) => {
                                     const target = event.target as HTMLElement;
                                     if(event.target.contentEditable === 'true') console.log('true')
@@ -170,16 +179,26 @@ const h5pEditorInputListener = () => {
                                     const savedPosition = saveCursorPosition(iframe2Doc);
                                     const words = target.getElementsByClassName('highlight-word');
                                     // Make your changes
-                                    resetContent(target);
-                                    checkGenderAndHighlight(target);
-                                    highlightedWordListener(target,words, iframe2Doc);
-                                    setCaretAfterNewline(target, savedPosition);
-                                    
-                                    
-                                    // Restore cursor position after changes
-                                    if (savedPosition) {
-                                        restoreCursorPosition(iframe2Doc, savedPosition);
+                                    disableStyles()
+                                    if(timeout){
+                                        clearTimeout(timeout)
                                     }
+
+                                    timeout = setTimeout(()=>{
+                                        enableStyles()
+                                        resetContent(target);
+                                        checkGenderAndHighlight(target);
+                                        highlightedWordListener(target,words, iframe2Doc);
+                                        //setCaretAfterNewline(target, savedPosition);
+
+                                        // Restore cursor position after changes
+                                        if (savedPosition) {
+                                            restoreCursorPosition(iframe2Doc, savedPosition);
+                                        }
+                                    },3000)
+                                    
+                                    
+                                    
                                 });
                             }
                         } catch (error) {
