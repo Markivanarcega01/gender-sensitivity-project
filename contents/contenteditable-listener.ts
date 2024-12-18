@@ -32,7 +32,7 @@ document.addEventListener("input", (event) => { // there is a bug wherein the su
       checkGenderAndHighlight(target)
       highlightedWordListener(target,words, cursorPosition)
       setCaretAfterNewline(target, cursorPosition)
-    },5000)
+    },10000)
 
     // if(target.innerText != ''){
     //   btn.style.opacity= '1'
