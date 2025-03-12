@@ -3,7 +3,8 @@ import { useEffect, useState } from "react"
 import { dictionary } from "~components/dictionary"
 
 export const config: PlasmoCSConfig = {
-  matches: ["https://mail.google.com/mail/*", "https://workspace.upou.edu.ph/*"],
+  matches: ["<all_urls>"],
+  //matches: ["https://mail.google.com/mail/*", "https://workspace.upou.edu.ph/*"],
 }
 
 
@@ -24,9 +25,9 @@ const toastMessageForGenderBias = () => {
     document.addEventListener("input", (event:InputEvent) => {
       const target = event.target as HTMLInputElement
       let genderBias = []
-      console.log(target)
+      //console.log(target)
       if(target.nodeName === 'INPUT' || target.nodeName === 'TEXTAREA'){
-        console.log(target.value)
+        //console.log(target.value)
         Object.keys(dictionary).forEach(word =>{
           const regex = new RegExp(`\\b${word}\\b`, 'gi')
           //const regex2 = new RegExp(word, 'gi')
@@ -45,7 +46,7 @@ const toastMessageForGenderBias = () => {
         }
   
         arrLength = genderBias.length
-        console.log(genderBias)
+        //console.log(genderBias)
       }
     })
   },[])

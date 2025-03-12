@@ -1,9 +1,10 @@
 import type { PlasmoCSConfig } from "plasmo"
 import { useEffect, useState, type HtmlHTMLAttributes } from "react"
+import $ from "jquery"
 import { dictionary } from "~components/dictionary"
 export const config: PlasmoCSConfig = {
-  matches: ["https://workspace.upou.edu.ph/contentbank/view.php*"],
-  run_at: "document_start",
+  matches: ["https://workspace.upou.edu.ph/contentbank/view.php*","https://workspace.upou.edu.ph/mod/h5pactivity/view.php*"],
+  run_at: "document_end",
 }
 /**
  * window.load to find the h5p main wrap
@@ -17,21 +18,41 @@ export const config: PlasmoCSConfig = {
 const h5pListenerToaster = () => {
     const [op,setOp] = useState(0)
     const [display, setDisplay] = useState('')
-    
     const [genderWord,setGenderWord] = useState([''])
     let arrLength = 0
+    let activation  = true;
 
     useEffect(() => {
-        window.addEventListener('load', (event) => {
+        setDisplay(`To Activate Gender Bias Detection, Click here`)
+        setOp(1)
+        let timeout = setTimeout(() => {
+            setOp(0)
+        },5000)
+        window.addEventListener('focus', (event) => {
+            if(activation){
+                clearTimeout(timeout)
+                setDisplay('Gender Detection Activated')
+                    setOp(1)
+                    setTimeout(() => {
+                        setOp(0)
+                }, 3000)
+                activation = false
+            }
             try {
                 //throw new Error('asd')
-                const iframe = document.getElementsByClassName('h5p-player w-100 border-0')[0] as HTMLIFrameElement
+                //iframeTraverser(document)
+                //traverseIframes(document)
+                //const iframe = document.getElementsByClassName('h5p-player')[0] as HTMLIFrameElement
+                const iframe = document.querySelector('iframe')
                 const iframeDoc =  iframe.contentDocument
-                const iframe2 = iframeDoc.getElementsByClassName('h5p-iframe h5p-initialized')[0] as HTMLIFrameElement
+                console.log(iframeDoc)
+                //const iframe2 = iframeDoc.getElementsByClassName('h5p-iframe')[0] as HTMLIFrameElement
+                const iframe2 = iframeDoc.querySelector('iframe')
                 const iframe2Doc = iframe2.contentDocument
+                console.log(iframe2Doc)
                 if(iframe2Doc){
-                    iframe2Doc.addEventListener('click', (event:any) => {
-                        //console.log('clicked')
+                    iframe2Doc.addEventListener('click', (event) => {
+                        console.log('clicked')
                         const inputFields = iframe2Doc.querySelectorAll('input,textarea')
                         //console.log(inputFields)
                         inputFields.forEach((inputField) => {
@@ -65,12 +86,12 @@ const h5pListenerToaster = () => {
                 }
             } catch (error) {
                 console.log('ey')
-                setDisplay('Document not found: Reloading in 5 secs')
-                setOp(1)
-                setTimeout(() => {
-                    setOp(0)
-                    window.location.reload()
-                },5000)
+                // setDisplay('Document not found: Reloading in 5 secs')
+                // setOp(1)
+                // setTimeout(() => {
+                //     setOp(0)
+                //     window.location.reload()
+                // },5000)
             }    
         })
     },[])

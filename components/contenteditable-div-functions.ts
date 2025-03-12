@@ -185,7 +185,7 @@ export function checkGenderAndHighlight(text) {
 
   text.innerHTML = textWithHTML
   console.log({asd:textWithHTML})
-  return text;
+  return text.innerHTML;
 }
 
 

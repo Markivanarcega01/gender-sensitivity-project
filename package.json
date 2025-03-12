@@ -1,6 +1,6 @@
 {
   "name": "gender-sensitivity-project",
-  "displayName": "Gender sensitivity project",
+  "displayName": "Gender sensitivity checker",
   "version": "0.0.1",
   "description": "A basic Plasmo extension.",
   "author": "Mark Ivan Arcega",
@@ -10,6 +10,7 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "jquery": "^3.7.1",
     "plasmo": "0.89.2",
     "react": "18.2.0",
     "react-dom": "18.2.0"

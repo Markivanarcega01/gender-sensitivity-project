@@ -2,37 +2,72 @@ import type { PlasmoCSConfig } from "plasmo"
 import {dictionary, ignoredWords} from "../components/dictionary"
 
 export const config: PlasmoCSConfig = {
-  //matches: ["<all_urls>"],
-  matches: ["https://mail.google.com/mail/*", "http://127.0.0.1:8000/bias_checker/", "https://markivan01.pythonanywhere.com/bias_checker/"],
+  matches: ["<all_urls>"],
+  //matches: ["https://mail.google.com/mail/*", "http://127.0.0.1:8000/bias_checker/", "https://markivan01.pythonanywhere.com/bias_checker/"],
   run_at: "document_end",
   //css: ["font.css"]
 }
 
+let timeout = null
+let style = document.createElement('style');
+style.innerHTML = `
+    .highlight-word {
+        text-decoration: underline;
+        text-decoration-color: blue;
+        cursor: text;
+    }
+`;
+//document.head.appendChild(style);
+
 let div = document.createElement('div')
 let btn = document.createElement('button')
-let timeout = null
+
+div.style.cssText=`
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 1000;
+`
+btn.style.cssText = `
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background-color: #0160C9;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s;
+  display: none;
+`;
+btn.textContent = "G"
+div.appendChild(btn)
+
+document.body.appendChild(div)
 
 document.addEventListener("input", (event) => { // there is a bug wherein the suggested words are messing up the contenteditable
   if(event.target instanceof HTMLElement && event.target.contentEditable === "true"){
-    const target = event.target as HTMLElement
-    let cursorPosition = saveCursorPosition(target)
-    let words = document.getElementsByClassName("highlight-word")
+      event.target.addEventListener("keyup",(e)=>{
+        const target = event.target as HTMLElement
+        let cursorPosition = saveCursorPosition(target)
+        let words = document.getElementsByClassName("highlight-word")
 
-    disableStyles()
-    if(timeout){
-      btn.style.display = "block"
-      //btn.style.opacity= '1'
-      clearTimeout(timeout)
-    }
-    timeout = setTimeout(()=>{
-      //btn.style.opacity= '0'
-      btn.style.display = "none"
-      enableStyles()
-      resetContent(target)
-      checkGenderAndHighlight(target)
-      highlightedWordListener(target,words, cursorPosition)
-      setCaretAfterNewline(target, cursorPosition)
-    },10000)
+        disableStyles()
+        if(timeout){
+          btn.style.display = "block"
+          //btn.style.opacity= '1'
+          clearTimeout(timeout)
+        }
+        timeout = setTimeout(()=>{
+          //btn.style.opacity= '0'
+          btn.style.display = "none"
+          enableStyles()
+          resetContent(target)
+          checkGenderAndHighlight(target)
+          highlightedWordListener(target,words, cursorPosition)
+          setCaretAfterNewline(target, cursorPosition)
+        },8000)
 
     // if(target.innerText != ''){
     //   btn.style.opacity= '1'
@@ -49,7 +84,7 @@ document.addEventListener("input", (event) => { // there is a bug wherein the su
     //   console.log('attribute is set')
     //   btn.setAttribute('listener', 'true')
     // }
-
+  })
   }
   
 })
@@ -334,37 +369,4 @@ function enableStyles(){
   document.head.appendChild(style)
 }
 
-let style = document.createElement('style');
-style.innerHTML = `
-    .highlight-word {
-        text-decoration: underline;
-        text-decoration-color: blue;
-        cursor: text;
-    }
-`;
-//document.head.appendChild(style);
 
-
-div.style.cssText=`
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  z-index: 1000;
-`
-btn.style.cssText = `
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  background-color: #0160C9;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-family: system-ui, -apple-system, sans-serif;
-  transition: background-color 0.2s;
-  display: none;
-`;
-btn.textContent = "G"
-div.appendChild(btn)
-
-document.body.appendChild(div)

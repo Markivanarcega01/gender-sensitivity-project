@@ -5,7 +5,7 @@ import { dictionary, ignoredWords } from "~components/dictionary";
 
 export const config: PlasmoCSConfig = {
     matches: ["https://workspace.upou.edu.ph/contentbank/edit.php*"],
-    run_at: "document_start",
+    run_at: "document_end",
 }
 function getDocumentOffset(node: Node, offset: number, iframeDoc: Document): number {
     let totalOffset = 0;
@@ -102,16 +102,41 @@ const h5pEditorInputListener = () => {
     const [display, setDisplay] = useState('')
     const [genderWord,setGenderWord] = useState([''])
     let arrLength = 0
+    let activation  = true;
 
     useEffect(() => {
-        window.addEventListener('load', (event) => {
+        setDisplay(`To Activate Gender Bias Detection, Click here`)
+        setOp(1)
+        let timeout = setTimeout(() => {
+            setOp(0)
+        },5000)
+        window.addEventListener('focus', (event) => {
             //ignoredWords.length = 0
             console.log('loaded')
+            if(activation){
+                clearTimeout(timeout)
+                setDisplay('Gender Detection Activated')
+                    setOp(1)
+                    setTimeout(() => {
+                        setOp(0)
+                }, 3000)
+                activation = false
+            }
             try {
+                //traverseIframes(document)
                 //const iframe = document.getElementsByClassName('h5p-editor-iframe')[0] as HTMLIFrameElement || null
                 const iframe = document.querySelector('iframe')
                 const iframeDoc = iframe.contentDocument
-                console.log(iframeDoc)
+            //     let style = iframeDoc.createElement('style');
+            //         style.innerHTML = `
+            //             .highlight-word {
+            //                 text-decoration: underline;
+            //                 text-decoration-color: blue;
+            //                 cursor: text;
+            //     }
+            //    `;
+            //     iframeDoc.head.appendChild(style)
+            //     console.log(iframeDoc)
                 if(iframeDoc){
                     iframeDoc.addEventListener('click', (event:any) => {
                         //console.log('clicked')
@@ -144,84 +169,49 @@ const h5pEditorInputListener = () => {
                                 }
 
                                 arrLength = genderBias.length
-                                console.log(event.target.value)
+                                //console.log(event.target.value)
                             })
                         })
-                        //h5pContentEditable(iframeDoc)
-                        try {
-                            const iframe2 = iframeDoc.querySelector('iframe')
-                            const iframe2Doc = iframe2.contentDocument
 
-                            if (iframe2Doc) {
-                                console.log(iframe2Doc)
-                                let style = iframe2Doc.createElement('style');
-                                    style.innerHTML = `
-                                        .highlight-word {
-                                            text-decoration: underline;
-                                            text-decoration-color: blue;
-                                            cursor: text;
-                                        }
-                                    `;
-                                function disableStyles(){
-                                    if(style.parentNode){
-                                        style.parentNode.removeChild(style)
+                        // New structure of H5P
+                        const editableDiv = iframeDoc.querySelector('.ck-editor__editable')
+                        //console.log(editableDiv)
+
+                        //console.log(editableDiv.innerHTML)
+                        editableDiv.addEventListener('keyup', (event:any) => {
+                            const target = event.target as HTMLElement
+                            let genderBias = []
+                            Object.keys(dictionary).forEach(word =>{
+                                const regex = new RegExp(`\\b${word}\\b`, 'gi')
+                                    if(regex.test(target.innerHTML) && !genderBias.includes(word)){
+                                        genderBias.push(word)
+                                       
                                     }
-                                }
-                                function enableStyles(){
-                                    iframe2Doc.head.appendChild(style)
-                                }
-                                //iframe2Doc.head.appendChild(style);
-                                let timeout = null
-                                iframe2Doc.addEventListener('input', (event: any) => {
-                                    const target = event.target as HTMLElement;
-                                    if(event.target.contentEditable === 'true') console.log('true')
-                                    // Save cursor position before making changes
-                                    const savedPosition = saveCursorPosition(iframe2Doc);
-                                    const words = target.getElementsByClassName('highlight-word');
-                                    // Make your changes
-                                    disableStyles()
-                                    if(timeout){
-                                        clearTimeout(timeout)
-                                    }
-
-                                    timeout = setTimeout(()=>{
-                                        enableStyles()
-                                        resetContent(target);
-                                        checkGenderAndHighlight(target);
-                                        highlightedWordListener(target,words, iframe2Doc);
-                                        //setCaretAfterNewline(target, savedPosition);
-
-                                        // Restore cursor position after changes
-                                        if (savedPosition) {
-                                            restoreCursorPosition(iframe2Doc, savedPosition);
-                                        }
-                                    },10000)
-                                    
-                                    
-                                    
-                                });
+                            })
+                            if(arrLength !== genderBias.length){
+                                //setGenderWord(genderBias)
+                                setDisplay(`Gender-bias: ${genderBias.join(', ')}`)
+                                setOp(1)
+                                // setTimeout(() => {
+                                //     setOp(0)
+                                // }, 3000)
                             }
-                        } catch (error) {
-                            setDisplay(`H5P Content 'TEXT' not found: Click field to enable gender bias detection`)
-                            setOp(1)
-                            setTimeout(() => {
+                            if(genderBias.length === 0){
                                 setOp(0)
-                            },5000)
-                        }
-                        
+                            }
+
+                            arrLength = genderBias.length
+                            
+                        })
                     })
                 }
             } catch (error) {
                 console.log('Error')
-                setDisplay('Document not found: Reloading in 5 secs')
-                setOp(1)
-                setTimeout(() => {
-                    setOp(0)
-                    window.location.reload()
-                },5000)
-                // setInterval(function() {
-                //     location.reload()
-                //     clearInterval(this)
+                // setDisplay('Document not found: Reloading in 5 secs')
+                // setOp(1)
+                // setTimeout(() => {
+                //     setOp(0)
+                //     window.location.reload()
                 // },5000)
             }    
         })
