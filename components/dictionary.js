@@ -75,6 +75,7 @@ export const dictionary = {
   "lineman": ["line installer", "line repairer", "IGNORE"],
   "maid": ["domestic helper", "household worker", "IGNORE"],
   "man": ["human being", "human", "person", "individual", "IGNORE"],
+  "men": ["human beings", "humans", "people", "IGNORE"],
   "mankind": ["humankind", "humanity", "IGNORE"],
   "mastermind": ["creator", "IGNORE"],
   "masterplan": ["grand plan", "IGNORE"],
