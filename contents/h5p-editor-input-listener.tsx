@@ -107,6 +107,7 @@ const h5pEditorInputListener = () => {
     useEffect(() => {
         setDisplay(`To Activate Gender Bias Detection, Click here`)
         setOp(1)
+        //Debounce for 5 seconds
         let timeout = setTimeout(() => {
             setOp(0)
         },5000)

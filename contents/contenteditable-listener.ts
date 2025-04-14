@@ -53,6 +53,7 @@ document.addEventListener("input", (event) => { // there is a bug wherein the su
         let cursorPosition = saveCursorPosition(target)
         let words = document.getElementsByClassName("highlight-word")
 
+        //Debounce for 8 seconds
         disableStyles()
         if(timeout){
           btn.style.display = "block"
@@ -68,22 +69,6 @@ document.addEventListener("input", (event) => { // there is a bug wherein the su
           highlightedWordListener(target,words, cursorPosition)
           setCaretAfterNewline(target, cursorPosition)
         },8000)
-
-    // if(target.innerText != ''){
-    //   btn.style.opacity= '1'
-    // }else{
-    //   btn.style.opacity = '0'
-    // }
-    // if(btn.hasAttribute('listener')){
-    //   btn.addEventListener('click',(event)=>{
-    //     resetContent(target)
-    //     checkGenderAndHighlight(target)
-    //     highlightedWordListener(target,words, cursorPosition)
-    //   })
-    // }else{
-    //   console.log('attribute is set')
-    //   btn.setAttribute('listener', 'true')
-    // }
   })
   }
   
