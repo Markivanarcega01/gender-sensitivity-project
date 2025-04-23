@@ -25,6 +25,8 @@ export const dictionary = {
   "busboys": ["waiters assistants", "IGNORE"],
   "businessman": ["businessperson", "executive", "manager", "business owner", "retailer", "IGNORE"],
   "businessmen": ["businesspersons", "executives", "managers", "business owners", "retailers", "IGNORE"],
+  "businesswoman": ["businessperson", "executive", "manager", "business owner", "retailer", "IGNORE"],
+  "businesswomen": ["businesspersons", "executives", "managers", "business owners", "retailers", "IGNORE"],
   "cameraman": ["camera operator", "cinematographer", "photographer", "IGNORE"],
   "cameramen": ["camera operators", "cinematographers", "photographers", "IGNORE"],
   "chairman": ["chairperson", "IGNORE"],
