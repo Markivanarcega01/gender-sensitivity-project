@@ -1,6 +1,5 @@
 import type { PlasmoCSConfig } from "plasmo"
 import { useEffect, useState } from "react"
-import { checkGenderAndHighlight, highlightedWordListener, resetContent, setCaretAfterNewline } from "~components/contenteditable-div-functions";
 import { dictionary, ignoredWords } from "~components/dictionary";
 
 export const config: PlasmoCSConfig = {
