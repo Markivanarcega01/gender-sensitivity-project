@@ -31,3 +31,11 @@ This should create a production bundle for your extension, ready to be zipped an
 ## Submit to the webstores
 
 The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+
+# Localhost Setup
+
+1. Clone the source code
+ - git clone https://github.com/Markivanarcega01/gender-sensitivity-project.git
+2. CD to the directory of the project. cd gender-sensitivity-project
+3. run in terminal. npm run install(nodejs should be installed before running this command)
+4. then run npm run dev

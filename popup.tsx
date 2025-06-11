@@ -20,9 +20,6 @@ function IndexPopup() {
       <h2>
         You are currently at {currentUrl}
       </h2>
-      <a href="https://docs.plasmo.com" target="_blank">
-        View Docs
-      </a>
     </div>
   )
 }

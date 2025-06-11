@@ -15,6 +15,7 @@ const toastMessageForGenderBias = () => {
 
   let arrLength = 0
   let timeout = null
+  let globalTimeOut = null
 
   useEffect(() => {
     document.addEventListener("input", (event: InputEvent) => {
@@ -26,27 +27,28 @@ const toastMessageForGenderBias = () => {
         if (timeout) {
           clearTimeout(timeout)
         }
-        timeout = setTimeout(() => {
-          Object.keys(dictionary).forEach((word) => {
-            const regex = new RegExp(`\\b${word}\\b`, "gi")
-            //const regex2 = new RegExp(word, 'gi')
-            if (regex.test(target.value) && !genderBias.includes(word)) {
-              //If word in INPUT && If word not in genderBias
-              genderBias.push(word)
-            }
-          })
+        Object.keys(dictionary).forEach((word) => {
+          const regex = new RegExp(`\\b${word}\\b`, "gi")
+          //const regex2 = new RegExp(word, 'gi')
+          if (regex.test(target.value) && !genderBias.includes(word)) {
+            //If word in INPUT && If word not in genderBias
+            genderBias.push(word)
+          }
+        })
 
-          if (arrLength !== genderBias.length) {
-            setGenderWord(genderBias)
-            setDisplay(`Gender-bias: ${genderBias.join(", ")}`)
-            setOp(1)
-          }
-          if (genderBias.length === 0) {
+        if (arrLength !== genderBias.length) {
+          setGenderWord(genderBias)
+          setDisplay(`Gender-bias: ${genderBias.join(", ")}`)
+          setOp(1)
+          timeout = setTimeout(() => {
             setOp(0)
-          }
-          arrLength = genderBias.length
-          //console.log(genderBias)
-        }, 1000)
+          },5000)
+        }
+        if (genderBias.length === 0) {
+          setOp(0)
+        }
+        arrLength = genderBias.length
+        //console.log(genderBias)
       }
     })
   }, [])

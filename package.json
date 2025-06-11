@@ -3,7 +3,7 @@
   "displayName": "Gender sensitivity checker",
   "version": "0.0.1",
   "description": "A browser extension to detect gender bias.",
-  "author": "Mark Ivan Arcega",
+  "author": "UP Open University(Center for Open and Digital Teaching and Learning)",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
@@ -29,8 +29,7 @@
       "https://*/*"
     ],
     "permissions": [
-      "tabs",
-      "scripting"
+      "tabs"
     ]
   }
 }
